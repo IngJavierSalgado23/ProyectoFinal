@@ -73,6 +73,61 @@ def memory_usage_of_directories(path):
     res = ("Consumo de memoria por el directorio {0}\n {1}").format(path,out)
     print(res)
     log_Activity(res)
+def tipo_de_archivos():
+    #Idea brindada por el Equipo de Raul, Allan y Jorge
+    #Usar el comando find ocupa permiso de administrador y no encuentra los archivos ocultos.
+    res = ("Mapeando el disco duro. Por favor espere.\n")
+    print(res)
+    log_Activity(res)
+    contAudioF= 0
+    contImageF = 0
+    contVideoF = 0
+    contTXTF = 0
+    contShellF = 0
+    contFiles = 0
+    contDirs = 0
+    audioExt = [".3gp",".aa",".acc",".aax",".act",".aiff",".amr",".ape",".au",".awb",".dct",".dss",".dvf",".flac",".mp3",".msv",".raw",".wav"]
+    videoExt = [".webm",".mkv", ".flv",".vob", ".ogv", ".ogg",".drc", ".gif",".gifv",".mng",".avi",".mov",".qt",".wmv",".yuv",".rm",".rmvb",".asf",".amv",".mp4"
+                ,".m4p",".m4v",".mpg",".mp2",".mpeg",".m2v",".m4v",".svi",".3gp",".3g2",".mxf",".roq",".nsv",".f4p"]
+    imageExt = [".jpeg",".jfif",".jpg",".gif",".bmp",".pgn",".svg"]
+    for roots, dirs, files in os.walk("/"):
+        for dir in dirs:
+            contDirs +=1
+        for name in files:
+            if (name.endswith(tuple(audioExt))):
+                contAudioF+=1
+            elif (name.endswith(tuple(videoExt))):
+                contVideoF +=1
+            elif(name.endswith(tuple(imageExt))):
+                contImageF+=1
+            elif(name.endswith(tuple(".txt"))):
+                contTXTF +=1
+            elif(name.endswith(tuple(".sh"))):
+                contShellF +=1
+            contFiles +=1
+
+    res = ("Total de directorios =  {0}\n").format(contDirs)
+    print(res)
+    log_Activity(res)
+    res= ("Total de archivos de video = {0}\n").format( contVideoF)
+    print(res)
+    log_Activity(res)
+    res =("Total de archivos de imagen = {0}\n").format( contImageF)
+    print(res)
+    log_Activity(res)
+    res = ("Total de archivos de audio = {0}\n").format(contAudioF)
+    print(res)
+    log_Activity(res)
+    res = ("Total de archivos de txt = {0}\n").format(contTXTF)
+    print(res)
+    log_Activity(res)
+    res = ("Total de archivos de shell = {0}\n").format(contShellF)
+    print(res)
+    log_Activity(res)
+    resFiles = contFiles-(contShellF+contTXTF+contAudioF+contImageF+contVideoF)
+    res = ("Total de otros archivos = {0}\n").format(resFiles)
+    print(res)
+    log_Activity(res)
 def main():
     procesos_corriendo_PID = Queue()
     procesos_corriendo = Queue()
@@ -120,6 +175,7 @@ def main():
     pregunta = str(raw_input("Desea ver el estado del disco duro?, Y para ver estado del disco duro o N para continuar")).upper()
     if (pregunta == "Y"):
         disk_usage_general()
+        tipo_de_archivos()
         print(disk_usage("/"))
 
         pregunta = str(raw_input("Desea ver la memoria dedicada a un path en especifico?, Y para visualizar o N para continuar")).upper()
