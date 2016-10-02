@@ -1,6 +1,8 @@
 #Notas. Faltan Graficas, con el metodo de memory-usage-dir puedo sacar cuanta memoria estan utilizando y utilizando una regla de 3 con el total de bytes de mi disco
 #duro, obtenido por usage-disk, puedo sacar el porcentaje de memoria que agarrara cada path y graficarlos. Debo de saber que directorios hay en la computadora
 # por lo cual estaba pensando en utilizar os.walk, guardar el string y cortarlo. Seguir intentando con esto en el segundo parcial.
+#En el os.walk que ya tengo guardar los directorios en una lista. Despues correr un os.walk en cada directorio si quiero saber los archivos qu ehay en cada uno
+#Teniendo los directorios or os.walk puedo usar la funcion del path de memoria en cada directorio y graficarlos.
 import os
 import signal
 from multiprocessing import Queue
@@ -9,6 +11,9 @@ import subprocess as sp
 from subprocess import check_output
 import time
 from collections import namedtuple
+import logging
+
+from logging.handlers import RotatingFileHandler
 _ntuple_diskusage = namedtuple('usage', 'total used free')
 
 def lista_de_Procesos(queue,queuePID,delay):
@@ -22,27 +27,35 @@ def sort(opcion):
     if(opcion == 1):
        # print("Sort CPU")
         log_Activity("Procesos ordenados por CPU\n")
-        out = check_output("ps aux |sort -nrk 3,3", shell=True)
+        check_output("ps axo user,pcpu > /home/ingjaviersalgado23/CortarString.out ", shell=True)
+        out = check_output("(head -n 1 /home/ingjaviersalgado23/CortarString.out && tail -n +3  /home/ingjaviersalgado23/CortarString.out | sort -nrk 2,2)",
+        shell=True)
+       # out = check_output("ps aux |sort -nrk 3,3", shell=True)
         log_Activity(out)
         return out
     elif (opcion == 2):
         #print("Sort Memory")
         log_Activity("Procesos ordenados por Memory\n")
-        out = check_output("ps aux --sort -rss", shell=True)
+        check_output("ps axo user,pmem > /home/ingjaviersalgado23/CortarString.out ", shell=True)
+        out = check_output("(head -n 1 /home/ingjaviersalgado23/CortarString.out && tail -n +3  /home/ingjaviersalgado23/CortarString.out | sort -nrk 2,2)",shell = True)
+        #out = check_output("ps aux --sort -rss", shell=True)
         log_Activity(out)
         return out
     elif (opcion == 3):
        # print("Sort by pid")
         log_Activity("Procesos ordenados por pid\n")
-        out = check_output("ps aux --sort -pid", shell=True)
+        #out = check_output("ps axo user,pcpu | sort -nrk 2,2", shell=True)
+        check_output("ps axo user,pid > /home/ingjaviersalgado23/CortarString.out ", shell=True)
+        out = check_output("(head -n 1 /home/ingjaviersalgado23/CortarString.out && tail -n +3  /home/ingjaviersalgado23/CortarString.out | sort -nrk 2,2)",shell = True)
+        #out = check_output("ps axo user,pcpu, | sort -nrk 1,2", shell=True)
         log_Activity(out)
         return out
 
 
 def log_Activity(definicion):
     log = "/home/ingjaviersalgado23/crearLogs"
-    log_full = "/home/ingjaviersalgado23/crearLogs/LogProyecto.txt"
-    if(os.path.exists(log) and os.path.isfile("LogProyecto.txt")): #La segunda validacion no esta sirviendo como esperaba. Si existe directorio pero no archivo no entra aqui
+    log_full = "/home/ingjaviersalgado23/crearLogs/LogProyecto.log"
+    if(os.path.exists(log)):
         #print ("Existe el archivo")
         pass
     else:
@@ -50,9 +63,17 @@ def log_Activity(definicion):
         file = open(log_full,'a')
         file.close()
         print("creando archivo")
-    f = open(log_full, 'a')
-    f.write(definicion)
-    f.close()
+
+    logger = logging.getLogger("Log Proyecto Final")
+    logger.setLevel(logging.INFO)
+    handler = RotatingFileHandler(log_full, maxBytes=1000000,backupCount=100)
+    logger.addHandler(handler)
+    logger.info(definicion)
+    #handler.close()
+    #f = open(log_full, 'a')
+    #f.write(definicion)
+    #f.close()
+
 def disk_usage(path):
     st = os.statvfs(path)
     free = st.f_bavail * st.f_frsize
