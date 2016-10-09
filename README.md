@@ -16,3 +16,5 @@ Parcial 1 incluye las siguientes acciones:
 5.Para cubrir la parte de crear proceso, hay un proceso extra que siempre esta obteniendo los procesos corriendo, los cual sera util en el momento de graficar performance.
 
 6- La libreria que estoy planeando en utilizar es plotly. Requiere instalar la libreria plotly asi como crear una cuenta para entrar al servidor. Las graficas se realizaran en linea.
+
+7- Cuanta con la grafica sobre el mapeo del disco usando plot.ly
