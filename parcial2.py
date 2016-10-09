@@ -14,6 +14,7 @@ from collections import namedtuple
 import logging
 import plotly.plotly as py
 import plotly.graph_objs as go
+from Tkinter import *
 
 from logging.handlers import RotatingFileHandler
 _ntuple_diskusage = namedtuple('usage', 'total used free')
@@ -77,10 +78,6 @@ def log_Activity(definicion):
     handler = RotatingFileHandler(log_full, maxBytes=1000000000,backupCount=1)
     logger.addHandler(handler)
     logger.info(definicion)
-    #handler.close()
-    #f = open(log_full, 'a')
-    #f.write(definicion)
-    #f.close()
 def log_Process(definicion):
     log = "/home/ingjaviersalgado23/crearLogs"
     log_full = "/home/ingjaviersalgado23/crearLogs/LogProcesos.log"
@@ -208,9 +205,9 @@ def tipo_de_archivos():
     print(porceFree)
     print(porceOther)
     print(tamApps)
-    grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOther,tamAudio,tamVideo,tamImage,tamApps,tamOther,free)
+    grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOther,tamAudio,tamVideo,tamImage,tamApps,tamOther,free,total)
     #grafica_de_memoria_usada(tamAudio,tamVideo,tamImage,tamApps)
-def grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOther,tamAudio,tamVideo,tamImage,tamApps,tamOther,free):
+def grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOther,tamAudio,tamVideo,tamImage,tamApps,tamOther,free,total):
     # tamAudio = kilobyte_a_GigaByte(tamAudio)
     # tamVideo = kilobyte_a_GigaByte(tamVideo)
     # tamImage = kilobyte_a_GigaByte(tamImage)
@@ -219,7 +216,7 @@ def grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOt
     # free = kilobyte_a_GigaByte(free)
 
     trace1 = go.Bar(
-        y=['Mapeo del disco'],
+        y=[('Disco = {0}kB').format(total)],
         x=[porceAudio],
         name=('Archivos de Audio {0}kB').format(tamAudio),
         orientation='h',
@@ -231,7 +228,7 @@ def grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOt
         )
     )
     trace2 = go.Bar(
-        y=['Mapeo del disco'],
+        y=[('Disco = {0}kB').format(total)],
         x=[porceVideo],
         name=('Archivos de Video {0}kB').format(tamVideo),
         orientation='h',
@@ -243,7 +240,7 @@ def grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOt
         )
     )
     trace3 = go.Bar(
-        y=['Mapeo del disco'],
+        y=[('Disco = {0}kB').format(total)],
         x=[porceImage],
         name=('Imagenes {0}kB').format(tamImage),
         orientation='h',
@@ -255,7 +252,7 @@ def grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOt
         )
     )
     trace4 = go.Bar(
-        y=['Mapeo del disco'],
+        y=[('Disco = {0}kB').format(total)],
         x=[porceApps],
         name=('Applicaciones {0}kB').format(tamApps),
         orientation='h',
@@ -267,7 +264,7 @@ def grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOt
         )
     )
     trace5 = go.Bar(
-        y=['Mapeo del disco'],
+        y=[('Disco = {0}kB').format(total)],
         x=[porceOther],
         name=('Otros Archivos {0}kB').format(tamOther),
         orientation='h',
@@ -279,7 +276,7 @@ def grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOt
         )
     )
     trace6 = go.Bar(
-        y=['Mapeo del disco'],
+        y=[('Disco = {0}kB').format(total)],
         x=[porceFree],
         name=('Espacio Libre {0}kB').format(free),
         orientation='h',
@@ -361,61 +358,62 @@ def grafica_de_memoria_usada(tamAudio,tamVideo,tamImage,tamApps):
 
     fig = go.Figure(data=data, layout=layout)
     py.plot(fig, filename='marker-h-bar')
-def main():
-    procesos_corriendo_PID = Queue()
-    delay = 1
-    consigue_Procesos = Process(target =guarda_procesos,args = (delay,))
-    consigue_Procesos.daemon = True
-    consigue_Procesos.start()
-   #  PID_procesos = procesos_corriendo_PID.get()
-   #  print("Pid del proceso que consigue de manera continua los procesos del ordenador  = {0}").format(PID_procesos)
-    print("Pid del proceso del programa = {0}").format(os.getpid())
-    pregunta = str(raw_input("Desea ver los procesos corriendo?, Y para mostrar o N para continuar")).upper()
-    if( pregunta =="Y" ):
-        while(True):
-            opcion = eval(raw_input("De que forma quiere visualizarlos?. 1 = Uso de CPU. 2= Uso de memoria 3 = PID. 4 = Continuar"))
-            if(opcion == 1):
-                print(sort(1))
-            elif (opcion == 2):
-                print(sort(2))
-            elif (opcion == 3):
-                print(sort(3))
-            elif(opcion == 4):
-                print("Entro en 4")
-                break
-            else:
-                print("Entrada no valida")
 
-    pregunta = str(raw_input("Desea matar un proceso?, Y para matar o N para continuar")).upper()
+root = Tk()                             #main window
+root.title("Salgado")
+btnMap = Button(root, text = 'Mapea al disco duro', command = tipo_de_archivos)
+btnMap.pack(pady=20, padx = 20)
+root.mainloop()
+delay = 1
+consigue_Procesos = Process(target =guarda_procesos,args = (delay,))
+consigue_Procesos.daemon = True
+consigue_Procesos.start()
+
+print("Pid del proceso del programa = {0}").format(os.getpid())
+pregunta = str(raw_input("Desea ver los procesos corriendo?, Y para mostrar o N para continuar")).upper()
+if( pregunta =="Y" ):
+    while(True):
+        opcion = eval(raw_input("De que forma quiere visualizarlos?. 1 = Uso de CPU. 2= Uso de memoria 3 = PID. 4 = Continuar"))
+        if(opcion == 1):
+            print(sort(1))
+        elif (opcion == 2):
+            print(sort(2))
+        elif (opcion == 3):
+            print(sort(3))
+        elif(opcion == 4):
+            print("Entro en 4")
+            break
+        else:
+            print("Entrada no valida")
+
+pregunta = str(raw_input("Desea matar un proceso?, Y para matar o N para continuar")).upper()
+if(pregunta == "Y"):
+    while(True):
+        opcion = eval(raw_input("Introduzca el pid del proceso que quiere matar"))
+        try:
+            os.kill(opcion,signal.SIGKILL)
+            matar_proceso = ("Se elimino exitosamente el proceso {0}").format(opcion)
+            log_Activity(matar_proceso)
+            print(matar_proceso)
+            pregunta = str(raw_input("Desea matar otro proceso?, Y para matar o N para continuar")).upper()
+            if(pregunta != "Y"):
+                break
+        except:
+            print("Error. No se pudo matar el proceso")
+            break
+pregunta = str(raw_input("Desea ver el estado del disco duro?, Y para ver estado del disco duro o N para continuar")).upper()
+if (pregunta == "Y"):
+    disk_usage_general()
+    tipo_de_archivos()
+    print(disk_usage("/"))
+    pregunta = str(raw_input("Desea ver la memoria dedicada a un path en especifico?, Y para visualizar o N para continuar")).upper()
     if(pregunta == "Y"):
-        while(True):
-            opcion = eval(raw_input("Introduzca el pid del proceso que quiere matar"))
+        while (True):
+            path = str(raw_input("Introduzca el path que quiera visualizar"))
             try:
-                os.kill(opcion,signal.SIGKILL)
-                matar_proceso = ("Se elimino exitosamente el proceso {0}").format(opcion)
-                log_Activity(matar_proceso)
-                print(matar_proceso)
-                pregunta = str(raw_input("Desea matar otro proceso?, Y para matar o N para continuar")).upper()
-                if(pregunta != "Y"):
-                    break
+                memory_usage_of_directories(path)
             except:
-                print("Error. No se pudo matar el proceso")
+                print("Error. El path que introdujo no existe")
+            pregunta = str(raw_input("Desea visualizar otro path? Y para visualizar o N para continuar")).upper()
+            if(pregunta != "Y"):
                 break
-    pregunta = str(raw_input("Desea ver el estado del disco duro?, Y para ver estado del disco duro o N para continuar")).upper()
-    if (pregunta == "Y"):
-        disk_usage_general()
-        tipo_de_archivos()
-        print(disk_usage("/"))
-
-        pregunta = str(raw_input("Desea ver la memoria dedicada a un path en especifico?, Y para visualizar o N para continuar")).upper()
-        if(pregunta == "Y"):
-            while (True):
-                path = str(raw_input("Introduzca el path que quiera visualizar"))
-                try:
-                    memory_usage_of_directories(path)
-                except:
-                    print("Error. El path que introdujo no existe")
-                pregunta = str(raw_input("Desea visualizar otro path? Y para visualizar o N para continuar")).upper()
-                if(pregunta != "Y"):
-                    break
-main()
