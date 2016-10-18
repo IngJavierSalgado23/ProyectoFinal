@@ -2,57 +2,35 @@ import Tkinter as tk
 import ttk
 from Tkinter import *
 from Funciones import *
-def main():
-    delay = 1
-    consigue_Procesos = Process(target=guarda_procesos, args=(delay,))
-    consigue_Procesos.daemon = True
-    consigue_Procesos.start()
+from multiprocessing import Process
+from threading import Thread
+def click_derecho(event):
+    print("Proceso a matar")
+    try:
+        for item in tree.selection():
+            item_text = tree.item(item, "values")
+            pid = (item_text[4])
+            print pid
+        matar_proceso(pid)
+        lee_procesos_log(tree,1)
+    except:
+        print("Opcion no valida")
 
-    root = tk.Tk()
-    tree = ttk.Treeview()
-    root.title("Procesos Corriendo")
-    top = Frame(root)
-    bottom = Frame(root)
-    top.pack(side=TOP)
-    bottom.pack(side=BOTTOM, fill=BOTH, expand=True)
-    tree["columns"] = ("Command", "User", "Memory", "CPU", "PID")
-    names = ("Command", "User", "Memory", "CPU", "PID")
-    for name in names:
-        tree.column(name, width=100)
-        tree.heading(name, text=name)
-
-    lee_procesos_log(tree,0)
-    tree.bind("<Button-3>", click_derecho)
-    tree.bind("<Double-1>", OnDoubleClick)
-    btnMap = Button(root, text='Mapea al disco duro', command=map_disk)
-    btnMap.pack()
-    btnSortCPU = Button(root, text='Procesos por CPU', command=lambda:lee_procesos_log(tree,2) )
-    btnSortMem = Button(root, text='Procesos por Memoria', command=lambda: lee_procesos_log(tree,1))
-    btnMap.pack(in_=top,side=RIGHT)
-    btnSortCPU.pack(in_=top,side=RIGHT)
-    btnSortMem.pack(in_=top,side=RIGHT)
-    btnGraficaCPU = Button(root,text= 'Graficar el uso de CPU', command = lambda:grafica(0))
-    btnGraficaCPU.pack(in_=bottom,side=RIGHT)
-    btnGraficaMem = Button(root,text= 'Graficar el uso de Memoria', command = lambda:grafica(1))
-    btnGraficaMem.pack(in_=bottom,side=RIGHT)
-    tree.pack()
-    root.mainloop()
+def refresh_gui():
+    opcion = 1
+    while(True):
+        if(queue_opcion.empty() == False):
+            opcion = queue_opcion.get()
+        #print(opcion)
+        lee_procesos_log(opcion,True)
+        time.sleep(5)
 
 
-
-def click_derecho(event,root):
-    #try:
-        item = root.tree.selection()[0]
-        print("you clicked on", root.tree.item(item,"text"))
-    #except:
-        print("Error")
-
-
-def OnDoubleClick(self, event):
-    item = self.tree.identify('item', event.x, event.y)
-    print("you clicked on", self.tree.item(item, "text"))
-
-def lee_procesos_log(tree,opcion):
+def lee_procesos_log(opcion,hijo):
+    if(hijo):
+        pass
+    else:
+        queue_opcion.put(opcion)
     check_output("ps axo pmem,pcpu,user,pid,command> /home/ingjaviersalgado23/tempo.log", shell=True)
     if (opcion == 0):
         out = check_output("awk '{print $1}' /home/ingjaviersalgado23/tempo.log ", shell=True)
@@ -91,11 +69,52 @@ def lee_procesos_log(tree,opcion):
         pid = (out.splitlines())
         out = check_output("awk '{print $5}' /home/ingjaviersalgado23/tempo2.log ", shell=True)
         procesos = (out.splitlines())
-    repaint(procesos,user,mem,cpu,pid,tree)
-def repaint(procesos,user,mem,cpu,pid,tree):
+    repaint(procesos,user,mem,cpu,pid)
+def repaint(procesos,user,mem,cpu,pid):
     for i in tree.get_children():
         tree.delete(i)
     for i in range(1, len(mem) - 1):
         tree.insert("", "end", text=procesos[i], values=("", user[i], mem[i], cpu[i], pid[i]))
+    print("Refresh")
 
-main()
+queue_opcion = Queue()
+queue_PID = Queue()
+delay = 1
+consigue_Procesos = Thread(target=guarda_procesos, args=(delay,))
+consigue_Procesos.daemon = True
+consigue_Procesos.start()
+refresh_tktree = Thread(target = refresh_gui)
+refresh_tktree.daemon = True
+root = tk.Tk()
+scrollbar = Scrollbar(root)
+scrollbar.pack(side=RIGHT, fill=Y)
+tree = ttk.Treeview(yscrollcommand=scrollbar.set)
+scrollbar.config(command=tree.yview)
+root.title("Procesos Corriendo")
+top = Frame(root)
+bottom = Frame(root)
+top.pack(side=TOP, fill = BOTH, expand= False)
+bottom.pack(side=BOTTOM, fill=BOTH, expand=False)
+tree["columns"] = ("Command", "User", "Memory", "CPU", "PID")
+names = ("Command", "User", "Memory", "CPU", "PID")
+for name in names:
+    tree.column(name, width=100)
+    tree.heading(name, text=name)
+lee_procesos_log(0,False)
+btnMap = Button(root, text='Mapea al disco duro', command=map_disk)
+btnMap.pack()
+btnSortCPU = Button(root, text='Procesos por CPU', command=lambda: lee_procesos_log(2,False))
+btnSortMem = Button(root, text='Procesos por Memoria', command=lambda: lee_procesos_log(1,False))
+btnMap.pack(in_=top, side=RIGHT)
+btnSortCPU.pack(in_=top, side=RIGHT)
+btnSortMem.pack(in_=top, side=RIGHT)
+btnGraficaCPU = Button(root, text='Graficar el uso de CPU', command=lambda: grafica(0,queue_PID))
+btnGraficaCPU.pack(in_=bottom, side=RIGHT)
+btnGraficaMem = Button(root, text='Graficar el uso de Memoria', command=lambda: grafica(1,queue_PID))
+btnGraficaMem.pack(in_=bottom, side=RIGHT)
+btnExit = Button(root, text='Exit', command=root.destroy)
+btnExit.pack(in_=bottom, side=LEFT)
+tree.bind("<Button-3>", click_derecho)
+tree.pack(fill=BOTH, expand=1, side=LEFT)
+refresh_tktree.start()
+root.mainloop()

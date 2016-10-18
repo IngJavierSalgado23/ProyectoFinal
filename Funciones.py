@@ -16,9 +16,9 @@ import plotly.plotly as py
 import plotly.graph_objs as go
 from Tkinter import *
 import matplotlib.pyplot as plt
-
-
-
+from graficaUso import *
+from threading import Thread
+import threading
 
 from logging.handlers import RotatingFileHandler
 _ntuple_diskusage = namedtuple('usage', 'total used free')
@@ -32,7 +32,6 @@ def lista_de_Procesos(queue,queuePID,delay):
 
 def guarda_procesos(delay):
     while(True):
-        log_Process("Nueva Lista de Procesos")
         out = check_output("ps axo pmem,pcpu,user,pid,command", shell = True)
         log_Process(out)
         time.sleep(delay)
@@ -65,10 +64,10 @@ def sort(opcion):
         return out
 
 def matar_proceso(opcion):
-    print(opcion)
+
     try:
 
-        os.kill(opcion, signal.SIGKILL)
+        os.kill(eval(opcion), signal.SIGKILL)
         matar_proceso = ("Se elimino exitosamente el proceso {0}").format(opcion)
         log_Activity(matar_proceso)
         print(matar_proceso)
@@ -100,15 +99,23 @@ def log_Process(definicion):
         file = open(log_full, 'a')
         file.close()
         print("creando archivo")
-
-    logger = logging.getLogger("Log Proyecto Final")
-    logger.setLevel(logging.INFO)
-    #handler = RotatingFileHandler(log_full, maxBytes=1073741824, backupCount=10)
-    handler = RotatingFileHandler(log_full, maxBytes=10000000, backupCount=1)
-    logger.addHandler(handler)
-    logger.info(definicion)
-
-
+    f = open(log_full, 'a')
+    f.write(definicion)
+    f.close()
+    ##Handler Salgado
+    out = check_output(("du -h  '{0}' --block-size=mB | cut -d'M' -f1").format(log), shell= True)
+    tam = eval(out)
+    contador = eval(check_output("find /home/ingjaviersalgado23/crearLogs -type f | wc -l",shell = True))
+    if(tam>(1*contador)):
+        print("Rotating log")
+        print(tam)
+        check_output(("mv /home/ingjaviersalgado23/crearLogs/LogProcesos.log /home/ingjaviersalgado23/crearLogs/LogProcesos.log.{0}").format(contador),shell = True)
+    # logger = logging.getLogger("Log Proyecto Final")
+    # logger.setLevel(logging.INFO)
+    # #handler = RotatingFileHandler(log_full, maxBytes=1073741824, backupCount=10)
+    # handler = RotatingFileHandler(log_full, maxBytes=(1024*1024), backupCount=15)
+    # logger.addHandler(handler)
+    # logger.info(definicion)
 def disk_usage(path):
     st = os.statvfs(path)
     total = st.f_blocks * st.f_frsize
@@ -147,15 +154,16 @@ def tipo_de_archivos():
     tamVideo = 0
     tamApps = 0
     contApps = 0
-    ja = "Hola"
-    sa = "Hola"
 
     audioExt = [".3gp",".aa",".acc",".aax",".act",".aiff",".amr",".ape",".au",".awb",".dct",".dss",".dvf",".flac",".mp3",".msv",".raw",".wav"]
     videoExt = [".webm",".mkv", ".flv",".vob", ".ogv",".drc", ".gif",".gifv",".mng",".avi",".mov",".qt",".wmv",".yuv",".rm",".rmvb",".asf",".amv",".mp4"
                 ,".m4p",".m4v",".mpg",".mp2",".mpeg",".m2v",".m4v",".svi",".3gp",".3g2",".mxf",".roq",".nsv",".f4p"]
     imageExt = [".jpeg",".jfif",".jpg",".gif",".bmp",".pgn",".svg"]
-    for roots, dirs, files in os.walk("/"):
+    for roots, dirs, files in os.walk("/home/ingjaviersalgado23"):
         for dir in dirs:
+            # path= os.path.join(roots,dir)
+            # out = (check_output(("du -h --max-depth=1 | sort -hr").format(path), shell=True))
+            # print(path,out)
             contDirs +=1
         for name in files:
             if (name.endswith(tuple(audioExt))):
@@ -178,7 +186,6 @@ def tipo_de_archivos():
                 contApps+=1
                 tamApps += eval(check_output(("du -h  '{0}' --block-size=kB | cut -d'k' -f1").format(path),shell=True))
             contFiles +=1
-
     res = ("Total de directorios =  {0}\n").format(contDirs)
     print(res)
     log_Activity(res)
@@ -220,7 +227,91 @@ def tipo_de_archivos():
     print(porceOther)
     print(tamApps)
     grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOther,tamAudio,tamVideo,tamImage,tamApps,tamOther,free,total)
+    map_por_folders()
     #grafica_de_memoria_usada(tamAudio,tamVideo,tamImage,tamApps)
+def grafica_directorios():
+    trace1 = go.Area(
+        r=[77.5, 72.5, 70.0, 45.0, 22.5, 42.5, 40.0, 62.5],
+        t=['North', 'N-E', 'East', 'S-E', 'South', 'S-W', 'West', 'N-W'],
+        name='11-14 m/s',
+        marker=dict(
+            color='rgb(106,81,163)'
+        )
+    )
+    trace2 = go.Area(
+        r=[57.49999999999999, 50.0, 45.0, 35.0, 20.0, 22.5, 37.5, 55.00000000000001],
+        t=['North', 'N-E', 'East', 'S-E', 'South', 'S-W', 'West', 'N-W'],
+        name='8-11 m/s',
+        marker=dict(
+            color='rgb(158,154,200)'
+        )
+    )
+    trace3 = go.Area(
+        r=[40.0, 30.0, 30.0, 35.0, 7.5, 7.5, 32.5, 40.0],
+        t=['North', 'N-E', 'East', 'S-E', 'South', 'S-W', 'West', 'N-W'],
+        name='5-8 m/s',
+        marker=dict(
+            color='rgb(203,201,226)'
+        )
+    )
+    trace4 = go.Area(
+        r=[20.0, 7.5, 15.0, 22.5, 2.5, 2.5, 12.5, 22.5],
+        t=['North', 'N-E', 'East', 'S-E', 'South', 'S-W', 'West', 'N-W'],
+        name='< 5 m/s',
+        marker=dict(
+            color='rgb(242,240,247)'
+        )
+    )
+    data = [trace1, trace2, trace3, trace4]
+    layout = go.Layout(
+        title='Wind Speed Distribution in Laurel, NE',
+        font=dict(
+            size=16
+        ),
+        legend=dict(
+            font=dict(
+                size=16
+            )
+        ),
+        radialaxis=dict(
+            ticksuffix='%'
+        ),
+        orientation=270
+    )
+    fig = go.Figure(data=data, layout=layout)
+    py.plot(fig, filename='polar-area-chart')
+def map_por_folders():
+    lista = os.listdir("/home/ingjaviersalgado23/")
+    listaPadre = []
+    listaHijos = []
+    diccionarioHijos = {}
+    folders = {}
+    for padre in lista:
+        padreC = os.path.join("/home/ingjaviersalgado23/",padre)
+        #print (padreC)
+        if(os.path.isdir(padreC)):
+            listaPadre.append(padreC)
+    #print(listaPadre)
+    print("Hijos y padres")
+    for padre in listaPadre:
+        out = check_output(("du -h  '{0}' --block-size=kB ").format(padre), shell = True) #Me imprime los hijos #Aqui puedo evaluar si son hijos
+        tempoOut = out.splitlines()
+        for i in range (len(tempoOut)-2):
+            listaHijos2Generacion = []
+            listaHijos2Generacion.append(tempoOut[i])
+            #print("Hijo") #crear nodo de hijos, la ref de papa es el ultimo en la lista tempoOut=
+            diccionarioHijos[tempoOut[len(tempoOut)-1]] = listaHijos2Generacion
+        for archivo in tempoOut:
+            #print(archivo)
+            #time.sleep(5)
+            listaHijos.append(archivo)
+    print(listaHijos)
+    for hijo in listaHijos:
+        tempo = hijo.split()
+        folders[tempo[1]] = tempo[0]
+    print(folders)
+    print(len(folders))
+    print(diccionarioHijos)
 def grafica_memoria(porceAudio,porceVideo,porceImage,porceApps,porceFree,porceOther,tamAudio,tamVideo,tamImage,tamApps,tamOther,free,total):
     # tamAudio = kilobyte_a_GigaByte(tamAudio)
     # tamVideo = kilobyte_a_GigaByte(tamVideo)
@@ -313,8 +404,6 @@ def kilobyte_a_GigaByte(num):
     num = float(num/1000000)
     return num
 
-
-
 def grafica_de_memoria_usada(tamAudio,tamVideo,tamImage,tamApps):
     trace1 = go.Bar(
         y=['Mapeo del disco'],
@@ -373,73 +462,66 @@ def grafica_de_memoria_usada(tamAudio,tamVideo,tamImage,tamApps):
     fig = go.Figure(data=data, layout=layout)
     py.plot(fig, filename='marker-h-bar')
 
-def task_manager():
-   #app = App()
-    print("hola")
 def map_disk():
     mapea = Process(target=tipo_de_archivos)
     mapea.daemon = True
     mapea.start()
-def grafica(opcion):
+def grafica(opcion,qPid):
+
+    datos = []
     if(opcion == 0):
-        grafica = Process(target=start_grafica, args=(0,))
+        grafica = Thread(target=grafica_cpu, args=(datos,1,qPid))
         grafica.start()
     elif(opcion==1):
-        grafica = Process(target=start_grafica,args=(1,))
+        grafica = Thread(target=grafica_cpu,args=(datos,2,qPid))
         grafica.start()
-def start_grafica(opcion):
-    graf = grafica()
-    #graf.start_grafica(opcion)
-# def start_grafica(opcion):
-#     print("Vamos por el buen camino")
-#     print("Graficando")
-#     contX = 0
-#     datosX = []
-#     datos = []
-#     total = len(datos)
-#     while (True):
-#         if(opcion == 0): #CPU
-#             check_output("ps axo pmem,pcpu> /home/ingjaviersalgado23/grafica.log", shell=True)
-#             check_output("tail -n +2 /home/ingjaviersalgado23/grafica.log > /home/ingjaviersalgado23/grafica2.log",shell=True)
-#             out = check_output("awk '{print $2}' /home/ingjaviersalgado23/grafica2.log ", shell=True)
-#             procesos = (out.splitlines())
-#         elif(opcion ==1): #Memoria
-#             check_output("ps axo pmem,pcpu> /home/ingjaviersalgado23/grafica.log", shell=True)
-#             check_output("tail -n +2 /home/ingjaviersalgado23/grafica.log > /home/ingjaviersalgado23/grafica2.log",
-#                          shell=True)
-#             out = check_output("awk '{print $1}' /home/ingjaviersalgado23/grafica2.log ", shell=True)
-#             procesos = (out.splitlines())
-#         for proceso in procesos:
-#             total += eval(proceso)
-#         print(len(datos))
-#         datos.append(total)
-#         total = 0
-#         if (len(datos) > 20):
-#             check_output("rm /home/ingjaviersalgado23/grafica.log", shell=True)
-#             check_output("rm /home/ingjaviersalgado23/grafica2.log", shell=True)
-#             plt.ion()
-#             fig = plt.figure()
-#             ax = fig.add_subplot(111)
-#             line1, = ax.plot(datosX, datos, 'r-')  # Returns a tuple of line objects, thus the comma
-#             print("update")
-#             fig.ylabel("CPU")
-#             fig.canvas.draw()
-#             time.sleep(10)
-#             print("clearing")
-#             #fig.clear()
-#         contX+=1
-#         datosX.append(contX)
-#
 
-
-def refreshGraficaCPU(pid):
+def grafica_cpu(datos,opcion,qPid):
+    qPid.put(os.getpid())
+    print("Graficando CPU")
+    total = len(datos)
+    while (True):
+        for i in range(20):
+            if(opcion == 1):
+                check_output("ps axo pmem,pcpu> /home/ingjaviersalgado23/grafica.log", shell=True)
+                check_output("tail -n +2 /home/ingjaviersalgado23/grafica.log > /home/ingjaviersalgado23/grafica2.log", shell=True)
+                out = check_output("awk '{print $2}' /home/ingjaviersalgado23/grafica2.log ", shell=True)
+                cpu = (out.splitlines())
+            else:
+                check_output("ps axo pmem,pcpu> /home/ingjaviersalgado23/grafica.log", shell=True)
+                check_output("tail -n +2 /home/ingjaviersalgado23/grafica.log > /home/ingjaviersalgado23/grafica2.log", shell=True)
+                out = check_output("awk '{print $1}' /home/ingjaviersalgado23/grafica2.log ", shell=True)
+                cpu = (out.splitlines())
+            for procesos in cpu:
+                total+= eval(procesos)
+            print(len(datos))
+            datos.append(total)
+            total = 0
+        if(len(datos)>=100):
+            # countdown= Process(target=refreshGraficaCPU, args=(os.getpid(),datos,opcion))
+            # countdown.start()
+            plt.plot(datos)
+            if(opcion == 1):
+                log_Activity("Datos por CPU")
+                plt.ylabel("Uso de CPU")
+            else:
+                log_Activity("Datos por Memoria ")
+                plt.ylabel("Uso de Memoria")
+            for dato in datos:
+                log_Activity(str(dato))
+            plt.show()
+            check_output("rm /home/ingjaviersalgado23/grafica.log ", shell=True)
+            check_output("rm /home/ingjaviersalgado23/grafica2.log ", shell=True)
+            time.sleep(10)
+def refreshGraficaCPU(pid,datos,opcion):
+    grafica_c = Process(target=grafica_cpu,args = (datos,opcion))
     print("Start Countdown")
-    time.sleep(10)
+    time.sleep(5)
     try:
+        grafica_c.start()
         os.kill(pid, signal.SIGKILL)
         matar_proceso = ("Se elimino exitosamente el proceso {0}").format(pid)
         print(matar_proceso)
     except:
         print("Error. No se pudo matar el proceso")
-
 
