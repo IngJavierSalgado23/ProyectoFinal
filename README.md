@@ -1,7 +1,12 @@
 #Informacion del proyecto final
 Elaboracion de un task manager. Equipo: Antonio Javier Salgado Hernandez Clase: Sistemas Operativos
 
-No se ocupa instalar nada para correr el codigo del parcial1.
+Librerias a importar
+Plotly (sudo pip install plotly)
+Tkinter (sudo apt-get gnome-disk-utility, sudo apt-get install python python-tk idle python-pmw python-imaging,sudo pip install tkintertable)
+Matlib (sudo apt-get install python-matplotlib)
+drawnow (sudo pip install drawnow)
+
 
 Parcial 1 incluye las siguientes acciones:
 
@@ -18,3 +23,11 @@ Parcial 1 incluye las siguientes acciones:
 6- La libreria que estoy planeando en utilizar es plotly. Requiere instalar la libreria plotly asi como crear una cuenta para entrar al servidor. Las graficas se realizaran en linea.
 
 7- Cuanta con la grafica sobre el mapeo del disco usando plot.ly
+
+2do Parcial
+1- Tabla de procesos elaborando usando treeview y tk. Se refresca cada 5 segundos.
+2- Se agregaron 3 botones para ordenar segun las columnas de consumo de cpu, consumo de memoria y PID
+3- Para matar un proceso de la tabla, se debe primero seleccionarlo y aplicar click-derecho.
+4- La grafica de distribucion del disco duro por archivos se logra usando plotly. Instalar y crear una cuenta de plotly para poder usarse. Despues de crear cuenta de plotly es necesario seguir las indicaciones descritas en el siguiente url https://plot.ly/python/getting-started/
+5- La grafica de distribucion del disco duro por directorios no la he terminado, hasta el momento solo he conseguido saber quienes es el directorio padre su peso quienes son sus directorios hijos con su peso, sin embargo no he podido graficarla.
+6- Grafica en tiempo real del consumo de memoria y cpu. Se logra oprimiendo su boton correspondiente en la gui. Cuando se presiona se crea un thread el cual consigue la informacion para graficarla. Se refresca cada segundo para simular el tiempo real. Para que se refrescara recibi ayuda de mi companero Carlos y utilize la libreria drawnow. La logica y la forma de conseguir la informacion en este metodo es mia, solo recibi ayuda en la parte de real time.
