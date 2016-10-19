@@ -69,6 +69,19 @@ def lee_procesos_log(opcion,hijo):
         pid = (out.splitlines())
         out = check_output("awk '{print $5}' /home/ingjaviersalgado23/tempo2.log ", shell=True)
         procesos = (out.splitlines())
+    elif(opcion ==3):
+        check_output("head -n 1 /home/ingjaviersalgado23/tempo.log > /home/ingjaviersalgado23/tempo2.log",shell=True)
+        check_output("tail -n +2 /home/ingjaviersalgado23/tempo.log | sort -nrk 4,4 >> /home/ingjaviersalgado23/tempo2.log",shell=True)
+        out = check_output("awk '{print $1}' /home/ingjaviersalgado23/tempo2.log ", shell=True)
+        mem = (out.splitlines())
+        out = check_output("awk '{print $2}' /home/ingjaviersalgado23/tempo2.log ", shell=True)
+        cpu = (out.splitlines())
+        out = check_output("awk '{print $3}' /home/ingjaviersalgado23/tempo2.log ", shell=True)
+        user = (out.splitlines())
+        out = check_output("awk '{print $4}' /home/ingjaviersalgado23/tempo2.log ", shell=True)
+        pid = (out.splitlines())
+        out = check_output("awk '{print $5}' /home/ingjaviersalgado23/tempo2.log ", shell=True)
+        procesos = (out.splitlines())
     repaint(procesos,user,mem,cpu,pid)
 def repaint(procesos,user,mem,cpu,pid):
     for i in tree.get_children():
@@ -113,6 +126,8 @@ btnGraficaCPU = Button(root, text='Graficar el uso de CPU', command=lambda:carlo
 btnGraficaCPU.pack(in_=bottom, side=RIGHT)
 btnGraficaMem = Button(root, text='Graficar el uso de Memoria', command=lambda: carlosGrafica(2))
 btnGraficaMem.pack(in_=bottom, side=RIGHT)
+btnSortPid =Button(root,text='Procesos por PID',command = lambda:lee_procesos_log(3,False))
+btnSortPid.pack(in_=top, side=RIGHT)
 btnExit = Button(root, text='Exit', command=root.destroy)
 btnExit.pack(in_=bottom, side=LEFT)
 tree.bind("<Button-3>", click_derecho)
