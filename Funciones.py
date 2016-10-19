@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 from graficaUso import *
 from threading import Thread
 import threading
+from drawnow import drawnow
 
 from logging.handlers import RotatingFileHandler
 _ntuple_diskusage = namedtuple('usage', 'total used free')
@@ -524,4 +525,50 @@ def refreshGraficaCPU(pid,datos,opcion):
         print(matar_proceso)
     except:
         print("Error. No se pudo matar el proceso")
+#Carlos me ayudo en graficar en tiempo real. Forma de conseguir datos y la logica es mia. Agradecimientos a mi companero Carlos.
+def carlosGrafica(opcion):
+    plt.ion()
+    plt.figure("grafica",figsize =(10,10))
+    x = []
+    i =0
+    y=[]
+    total =0
+    while True:
+        while i< 60:
+            x.append(i)
+            if(opcion ==1):
+                check_output("ps axo pmem,pcpu> /home/ingjaviersalgado23/grafica.log", shell=True)
+                check_output("tail -n +2 /home/ingjaviersalgado23/grafica.log > /home/ingjaviersalgado23/grafica2.log", shell=True)
+                out = check_output("awk '{print $2}' /home/ingjaviersalgado23/grafica2.log ", shell=True)
+                cpu = (out.splitlines())
+                print("Cpu")
+                for procesos in cpu:
+                    total += eval(procesos)
+            else:
+                check_output("ps axo pmem,pcpu> /home/ingjaviersalgado23/grafica.log", shell=True)
+                check_output("tail -n +2 /home/ingjaviersalgado23/grafica.log > /home/ingjaviersalgado23/grafica2.log",
+                             shell=True)
+                out = check_output("awk '{print $1}' /home/ingjaviersalgado23/grafica2.log ", shell=True)
+                mem = (out.splitlines())
+                print("mem")
+                for procesos in mem:
+                    total += eval(procesos)
+            y.append(total)
+            total =0
+            drawnow(lambda:muestra_grafica(x,y,opcion))
+            plt.pause(1)
+            i+=1
+        i = 59 #Solo recorre un dato
+        x.pop(59) #Saco el 59 porque x siempre va estar al final porque solo recorre de 1 en 1
+        y.pop(0) #Saca el ultimo dato para volver a tener espacio de graficar
 
+def muestra_grafica (x,y,opcion):
+    if(opcion ==1):
+        plt.axis((0,60,0,200))
+        plt.ylabel("Uso de cpu")
+        plt.title("Grafica de cpu")
+    else:
+        plt.axis((0,60,0,100))
+        plt.ylabel("Uso de memoria")
+        plt.title("Grafica de memoria")
+    plt.plot(x,y)
