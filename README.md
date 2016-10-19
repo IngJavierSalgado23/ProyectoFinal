@@ -24,7 +24,7 @@ Parcial 1 incluye las siguientes acciones:
 
 7- Cuanta con la grafica sobre el mapeo del disco usando plot.ly
 
-2do Parcial
+2do Parcial Para correr el 2do parcial, solo se ocupa window.py y funciones.py correr window para iniciar el programa.
 1- Tabla de procesos elaborando usando treeview y tk. Se refresca cada 5 segundos.
 2- Se agregaron 3 botones para ordenar segun las columnas de consumo de cpu, consumo de memoria y PID
 3- Para matar un proceso de la tabla, se debe primero seleccionarlo y aplicar click-derecho.
