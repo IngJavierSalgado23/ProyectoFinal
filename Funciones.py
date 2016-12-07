@@ -11,7 +11,6 @@ import plotly.plotly as py
 import plotly.graph_objs as go
 from Tkinter import *
 import matplotlib.pyplot as plt
-from graficaUso import *
 from threading import Thread
 import threading
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
