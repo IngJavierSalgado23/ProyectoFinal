@@ -31,3 +31,10 @@ Parcial 1 incluye las siguientes acciones:
 4- La grafica de distribucion del disco duro por archivos se logra usando plotly. Instalar y crear una cuenta de plotly para poder usarse. Despues de crear cuenta de plotly es necesario seguir las indicaciones descritas en el siguiente url https://plot.ly/python/getting-started/
 5- La grafica de distribucion del disco duro por directorios no la he terminado, hasta el momento solo he conseguido saber quienes es el directorio padre su peso quienes son sus directorios hijos con su peso, sin embargo no he podido graficarla.
 6- Grafica en tiempo real del consumo de memoria y cpu. Se logra oprimiendo su boton correspondiente en la gui. Cuando se presiona se crea un thread el cual consigue la informacion para graficarla. Se refresca cada segundo para simular el tiempo real. Para que se refrescara recibi ayuda de mi companero Carlos y utilize la libreria drawnow. La logica y la forma de conseguir la informacion en este metodo es mia, solo recibi ayuda en la parte de real time.
+
+Tercer Parcial
+1-Se obtuvieron 20gb addiciones de logs, los cuales juntadolos con el pasado suman un total de 30gb de logs.
+2- Los 30 gbs de logs fueron analizados en el codigo y elaboro recomendaciones a partir de la lectura. Los analisis estan en la seccion de recommendaciones y estan visualizados en un trreview, donde indica la cantidad de cpu rpromedio, memoria usada en promedio, pid, user y las numeras de veces que estuvo activo mientras se elaboraban los logs.
+3- Se anexo informacion de l a memoria virtual, swap y cache. Se anexo laposibilidad de graficar el uso de la memoria swap y el uso de la memoria fisica. Tambien se anexo un boton que te permite limpiar la memomoria cache y la memoria swap. Para poder correr la limpieza de memoria se debe de correr e archivo desde terminal con sudo.
+4- Se nexaron los stats de la aplicacion en una pestana  adiccional con el nombre de informacion.
+5. Se anexo el boton de mapeo por folders utilizando la libreria boabab.
