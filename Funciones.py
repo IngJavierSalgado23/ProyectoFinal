@@ -11,6 +11,7 @@ import plotly.plotly as py
 import plotly.graph_objs as go
 from Tkinter import *
 import matplotlib.pyplot as plt
+from graficaUso import *
 from threading import Thread
 import threading
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg, NavigationToolbar2TkAgg
@@ -598,7 +599,7 @@ def clean_swap_memory():
 
     check_output("sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'", shell= True)
     check_output("swapoff -a", shell = True)
-    check_output("swapon -a", shell = True)
+    check_output("swapon - a", shell = True)
     out = check_output("free -m", shell=True)
     print(out)
 def grafica_memoria(opcion):
@@ -685,37 +686,7 @@ def is_number(s):
         return True
     except ValueError:
         return False
-def leer_logs():
-    log_full = "/home/ingjaviersalgado23/crearLogs/LogProcesos1000.log"
-    contador = eval(check_output("find /home/ingjaviersalgado23/crearLogs -type f | wc -l",shell = True))
-    out = check_output("awk '{print $1}' /home/ingjaviersalgado23/crearLogs/LogProcesos1000.log ", shell=True)
-    mem = (out.splitlines())
-    out = check_output("awk '{print $2}' /home/ingjaviersalgado23/crearLogs/LogProcesos1000.log ", shell=True)
-    cpu = (out.splitlines())
-    out = check_output("awk '{print $3}' /home/ingjaviersalgado23/crearLogs/LogProcesos1000.log", shell=True)
-    user = (out.splitlines())
-    out = check_output("awk '{print $4}' /home/ingjaviersalgado23/crearLogs/LogProcesos1000.log ", shell=True)
-    pid = (out.splitlines())
-    out = check_output("awk '{print $6}' /home/ingjaviersalgado23/crearLogs/LogProcesos1000.log ", shell=True)
-    procesos = (out.splitlines())
-    out = check_output("awk '{print $5}' /home/ingjaviersalgado23/crearLogs/LogProcesos1000.log ", shell=True)
-    thread_count = (out.splitlines())
-    for i in range(0,len(mem)):
-        if(is_number(pid[i])):
-            lista_procesos.append(Proceso(mem[i], cpu[i], user[i], pid[i], procesos[i], thread_count[i]))
-    for process in lista_procesos:
-        for dirProcess in dir_procesos:
-            if(process.getComand() == dirProcess):
-                tempo_proceso = dir_procesos[dirProcess]
-                tempo_proceso.setMem(process.getMem())
-                tempo_proceso.setCPU(process.getCPU())
-                tempo_proceso.setThread(process.getThread())
-                tempo_proceso.incCounter()
-            else:
-                dir_procesos[str(process.getCommand())] = process
-dir_procesos = {}
 
-lista_procesos = list()
 def mapBoabab():
     thread_map_folders = Thread(target = runMapeo)
     thread_map_folders.start()
@@ -725,7 +696,7 @@ def analizandoLogs():
     hacer_analisis()
     leer_analisis()
 def hacer_analisis():
-    url_log = "/home/ingjaviersalgado23/readLogs/"
+    url_log = "/home/ingjaviersalgado23/crearLogs/"
     lista = os.listdir(url_log)
     for url in lista:
         url = ('{0}{1}').format(url_log,url)
