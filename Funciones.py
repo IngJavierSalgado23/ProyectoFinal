@@ -598,7 +598,7 @@ def clean_swap_memory():
 
     check_output("sudo sh -c 'echo 3 > /proc/sys/vm/drop_caches'", shell= True)
     check_output("swapoff -a", shell = True)
-    check_output("swapon - a", shell = True)
+    check_output("swapon -a", shell = True)
     out = check_output("free -m", shell=True)
     print(out)
 def grafica_memoria(opcion):
